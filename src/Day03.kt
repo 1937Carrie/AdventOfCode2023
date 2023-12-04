@@ -22,15 +22,15 @@ fun main() {
 fun commonPart(input: List<String>): MutableMap<Pair<Int, Int>, MutableList<Int>> {
     val chars = mutableMapOf<Pair<Int, Int>, MutableList<Int>>()
 
-    for (r in input.indices) {
-        for (c in 0 until input[r].length) {
+    input.indices.forEach { r ->
+        input[r].indices.forEach { c ->
             if (input[r][c] !in "01234566789.") {
                 chars[Pair(r, c)] = mutableListOf()
             }
         }
     }
 
-    for ((indexRow, row) in input.withIndex()) {
+    input.forEachIndexed { indexRow, row ->
         val matcher = Regex("\\d+").toPattern().matcher(row)
 
         while (matcher.find()) {
@@ -41,8 +41,8 @@ fun commonPart(input: List<String>): MutableMap<Pair<Int, Int>, MutableList<Int>
                 }
             }
 
-            for (o in edge.intersect(chars.keys)) {
-                chars[o]?.add(matcher.group()!!.toInt())
+            edge.intersect(chars.keys).forEach {
+                chars[it]?.add(matcher.group()!!.toInt())
             }
         }
     }
