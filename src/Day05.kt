@@ -11,27 +11,27 @@ fun main() {
     }
 
     fun part2(input: List<String>): Long {
-        val seeds: MutableList<Seed> = mutableListOf()
-        val newSeeds = mutableMapOf<String, String>()
-        input.first().substringAfter("seeds: ").split(" ").chunked(2).forEach {
-            newSeeds[it[0]] = it[1]
-        }
-
-        var listOf = ""
-
-        newSeeds.forEach { key, value ->
-            for (i in 0..<value.toLong()) {
-                listOf += (key.toLong() + i).toString() + " "
+        val seeds = input.first().substringAfter(" ").split(" ").map { it.toLong() }.chunked(2)
+            .map { it.first()..<it.first() + it.last() }
+        val categories = input.drop(2).joinToString("\n").split("\n\n").map { section ->
+            section.lines().drop(1).associate {
+                it.split(" ").map { it.toLong() }.let { (dest, source, length) ->
+                    source..(source + length) to dest..(dest + length)
+                }
             }
         }
 
-        val seedsMatcher = Regex("\\d+").toPattern().matcher(listOf)
-        while (seedsMatcher.find()) {
-            seeds.add(Seed(seedsMatcher.group().toLong(), input))
-        }
-        seeds.size.println()
-
-        return seeds.minOf { it.location }
+       return seeds.flatMap { seedsRange ->
+            categories.fold(listOf(seedsRange)) { aac, map ->
+                aac.flatMap {
+                    map.entries.mapNotNull { (source, dest) ->
+                        (maxOf(source.first, it.first) to minOf(source.last, it.last)).let { (start, end) ->
+                            if (start <= end) (dest.first - source.first).let { (start + it)..(end + it) } else null
+                        }
+                    }
+                }
+            }
+        }.minOf { it.first }
     }
 
     val input = readInput("Day05")
