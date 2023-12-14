@@ -20,10 +20,10 @@ fun main() {
     fun part2(input: List<String>): Int {
         val input2 = input.map { it.toCharArray() }
         var arrAfter = mutableListOf<CharArray>()
-        repeat(1_000_000_000) {
+        val times = 1_000_000_000
+        repeat(if (times <= 97) times else (times - 80) % 17 + 80) {
             arrAfter = moveRock2(input2)
         }
-
         var rowIndex = arrAfter.size
         return arrAfter.sumOf { row ->
             row.fold(0) { acc: Int, c: Char ->
@@ -32,7 +32,7 @@ fun main() {
         }
     }
 
-    val input = readInput("Day14_test")
+    val input = readInput("Day14")
     part1(input).println()
     part2(input).println()
 }
