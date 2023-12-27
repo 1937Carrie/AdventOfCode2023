@@ -1,7 +1,8 @@
-fun main(){
+fun main() {
     val input = readInput("Day20")
     val broadCaster = BroadCaster(input)
     broadCaster.hitTheButton(1000).println()
+    broadCaster.hitTheButtonUntilRx().println() // bruteforce cause long computing
 }
 
 class BroadCaster(configuration: List<String>) : Module(configuration, mutableMapOf(), "broadcaster", "") {
@@ -20,6 +21,22 @@ class BroadCaster(configuration: List<String>) : Module(configuration, mutableMa
             }
         }
         return countHigh * (countLow + times)
+    }
+
+    fun hitTheButtonUntilRx(): Long {
+        var countPresses = 0L
+        var rxLowPulse = false
+        while (!rxLowPulse) {
+            countPresses++
+            var events = sendPulse(false)
+            while (events.isNotEmpty()) {
+                rxLowPulse = events.any { event -> !event.pulse && event.target.name == "rx" }
+                events = events.flatMap { event ->
+                    event.target.receivePulse(event.pulse, event.source)
+                }
+            }
+        }
+        return countPresses
     }
 }
 
@@ -53,7 +70,7 @@ class Conjunction(configuration: List<String>, modules: MutableMap<String, Modul
     }
 }
 
-class TheOminousRxMachine(name:String) : Module(emptyList(), mutableMapOf(), name, "(% || &).not()")
+class TheOminousRxMachine(name: String) : Module(emptyList(), mutableMapOf(), name, "(% || &).not()")
 
 abstract class Module(
     configuration: List<String>,
@@ -97,5 +114,5 @@ abstract class Module(
 }
 
 data class Event(val source: String, val target: Module, val pulse: Boolean) {
-    override fun toString() = "$source -> ${if (pulse) "HIGH" else "LOW" } -> ${target.name}"
+    override fun toString() = "$source -> ${if (pulse) "HIGH" else "LOW"} -> ${target.name}"
 }
